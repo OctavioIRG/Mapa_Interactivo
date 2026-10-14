@@ -1,0 +1,612 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Franja oriente Los Sauces</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Semi+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: mesa de dibujo. Arriba el plano llave de la franja; debajo la manzana elegida a la izquierda y la ficha del lote a la derecha; al final la lista completa. */
+:root {
+  --papel: #EEF1F5;        /* mesa: gris frío, tirando al azul de la tinta */
+  --hoja: #FFFFFF;         /* la hoja del plano */
+  --tinta: #131A29;        /* trazo y texto */
+  --tenue: #586479;        /* cotas y texto secundario */
+  --regla: #CBD3DF;        /* líneas finas */
+  --pluma: #1F4FBF;        /* azul de bolígrafo: selección, como las marcas a pluma del plano */
+  --pluma-suave: #DFE8FB;
+  --calle: #DCE1E9;        /* calles entre manzanas */
+  --media: #8A5A00;  --media-fondo: #FCEFC4;
+  --baja: #A32A20;   --baja-fondo: #F9DCD8;
+  --alta: #2F6B4F;
+  --f-rotulo: "Barlow Semi Condensed", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --f-texto: "Barlow", "Helvetica Neue", Arial, sans-serif;
+  --f-cota: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --papel: #0E131C; --hoja: #161D2A; --tinta: #E7ECF5; --tenue: #9AA6BB; --regla: #2D384B;
+    --pluma: #8CAEFF; --pluma-suave: #20335F; --calle: #263042;
+    --media: #F1C566; --media-fondo: #47380F; --baja: #FF9E93; --baja-fondo: #4F211C; --alta: #7CC9A2;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --papel: #0E131C; --hoja: #161D2A; --tinta: #E7ECF5; --tenue: #9AA6BB; --regla: #2D384B;
+  --pluma: #8CAEFF; --pluma-suave: #20335F; --calle: #263042;
+  --media: #F1C566; --media-fondo: #47380F; --baja: #FF9E93; --baja-fondo: #4F211C; --alta: #7CC9A2;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--papel); color: var(--tinta); font-family: var(--f-texto); font-size: 15px; line-height: 1.45; }
+.pagina { max-width: 1180px; margin: 0 auto; padding-inline: 16px; padding-block: 28px 56px; display: flex; flex-direction: column; gap: 22px; }
+.num { font-family: var(--f-cota); font-variant-numeric: tabular-nums; }
+
+/* encabezado */
+.cab { display: flex; flex-direction: column; gap: 6px; }
+.sobre { font-family: var(--f-rotulo); font-weight: 600; font-size: 13px; letter-spacing: .09em; text-transform: uppercase; color: var(--tenue); margin: 0; }
+h1 { font-family: var(--f-rotulo); font-weight: 700; font-size: clamp(30px, 6vw, 44px); line-height: 1.02; margin: 0; letter-spacing: -.005em; text-wrap: balance; }
+.resumen { display: flex; flex-wrap: wrap; gap: 4px 22px; margin: 6px 0 0; padding: 0; list-style: none; font-size: 15px; }
+.resumen b { font-family: var(--f-cota); font-weight: 500; font-size: 15px; }
+.fuente { margin: 0; color: var(--tenue); font-size: 13.5px; max-width: 70ch; }
+a { color: var(--pluma); text-underline-offset: 2px; }
+
+/* hoja */
+.hoja { background: var(--hoja); border: 1px solid var(--regla); border-radius: 3px; min-width: 0; }
+.hoja-cab { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 16px; padding: 12px 16px 0; }
+h2 { font-family: var(--f-rotulo); font-weight: 600; font-size: 19px; margin: 0; }
+.nota { color: var(--tenue); font-size: 13px; margin: 0; }
+.lienzo { overflow-x: auto; padding: 4px 6px 8px; }
+.lienzo svg { display: block; }
+
+/* pestañas de manzana */
+.pestanas { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 16px 2px; }
+.pestanas button { font: 600 14px/1 var(--f-rotulo); letter-spacing: .02em; color: var(--tinta); background: transparent; border: 1px solid var(--regla); border-radius: 999px; padding: 8px 13px; cursor: pointer; }
+.pestanas button:hover { border-color: var(--tenue); }
+.pestanas button[aria-pressed="true"] { background: var(--tinta); color: var(--hoja); border-color: var(--tinta); }
+button:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--pluma); outline-offset: 2px; }
+
+/* trabajo: dibujo + ficha */
+.trabajo { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(280px, 1fr); gap: 18px; align-items: start; }
+@media (max-width: 860px) { .trabajo { grid-template-columns: minmax(0, 1fr); } }
+
+/* svg */
+svg text { font-family: var(--f-cota); fill: var(--tenue); }
+.rot { font-family: var(--f-rotulo); font-weight: 500; letter-spacing: .28em; fill: var(--tenue); }
+.guia { stroke: var(--regla); stroke-width: 1; stroke-dasharray: 6 4; fill: none; }
+.lote { fill: var(--hoja); stroke: var(--tinta); stroke-width: .8; cursor: pointer; }
+.lote.media { fill: var(--media-fondo); }
+.lote.baja { fill: var(--baja-fondo); }
+.lote:hover { fill: var(--pluma-suave); }
+.calle { fill: var(--calle); stroke: var(--tenue); stroke-width: .9; stroke-dasharray: 5 3; cursor: pointer; }
+.calle:hover { fill: var(--pluma-suave); }
+.n-calle { font-family: var(--f-rotulo); font-weight: 600; letter-spacing: .02em; fill: var(--tinta); pointer-events: none; }
+.n-calle.sum { fill: var(--pluma); }
+.llave .calle-llave { fill: var(--calle); stroke: var(--tenue); stroke-width: .5; cursor: pointer; }
+.llave .calle-llave:hover { fill: var(--pluma-suave); }
+.llave .calle-llave.sumado { fill: var(--pluma); fill-opacity: .6; }
+.raya { stroke: var(--baja); stroke-width: .7; opacity: .55; }
+.trama { pointer-events: none; }
+.contorno { fill: none; stroke: var(--tinta); stroke-width: 3; stroke-linejoin: round; pointer-events: none; }
+.elegido { fill: var(--pluma-suave); fill-opacity: .55; stroke: var(--pluma); stroke-width: 2.6; stroke-linejoin: round; pointer-events: none; }
+.n-lote { font-family: var(--f-rotulo); font-weight: 700; fill: var(--tinta); pointer-events: none; }
+.s-lote { fill: var(--tinta); pointer-events: none; }
+.cota { pointer-events: none; }
+.llave .mz { fill: var(--hoja); stroke: var(--tinta); stroke-width: 1.6; stroke-linejoin: round; cursor: pointer; }
+.llave .mz:hover { fill: var(--pluma-suave); }
+.llave .mz.activa { fill: var(--pluma-suave); stroke: var(--pluma); stroke-width: 2.4; }
+.llave .fino { fill: none; stroke: var(--tinta); stroke-width: .5; opacity: .55; pointer-events: none; }
+.llave .marca { pointer-events: none; }
+.llave .marca.media { fill: var(--media-fondo); }
+.llave .marca.baja { fill: var(--baja-fondo); }
+.llave .mz-n { font-family: var(--f-rotulo); font-weight: 700; fill: var(--tinta); pointer-events: none; }
+
+/* ficha del lote */
+.ficha { padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+.ficha .sobre { font-size: 12.5px; }
+.ficha h3 { font-family: var(--f-rotulo); font-weight: 700; font-size: 26px; line-height: 1.1; margin: 2px 0 0; text-wrap: balance; }
+.sup { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.sup .valor { font-family: var(--f-cota); font-weight: 500; font-size: 30px; letter-spacing: -.02em; }
+.sup .unidad { color: var(--tenue); }
+.chip { display: inline-flex; align-items: center; gap: 7px; font: 600 13px/1 var(--f-rotulo); letter-spacing: .03em; padding: 6px 10px 6px 8px; border-radius: 999px; border: 1px solid var(--regla); white-space: nowrap; }
+.ficha > .chip { align-self: flex-start; }
+.chip i { width: 10px; height: 10px; border-radius: 50%; border: 2px solid currentColor; flex: none; }
+.chip.alta { color: var(--alta); } .chip.alta i { background: currentColor; }
+.chip.media { color: var(--media); background: var(--media-fondo); border-color: transparent; }
+.chip.media i { background: linear-gradient(90deg, currentColor 50%, transparent 50%); }
+.chip.baja { color: var(--baja); background: var(--baja-fondo); border-color: transparent; } .chip.baja i { border-radius: 2px; }
+.chip.sin { color: var(--tenue); } .chip.sin i { border-style: dashed; }
+.chip.est { color: var(--tenue); border-style: dashed; } .chip.est i { border-style: dashed; background: transparent; }
+dl.medidas { margin: 0; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0; border-top: 1px solid var(--regla); }
+dl.medidas dt, dl.medidas dd { margin: 0; padding: 7px 0; border-bottom: 1px solid var(--regla); }
+dl.medidas dt { color: var(--tenue); font-size: 14px; padding-right: 12px; }
+dl.medidas dd { font-family: var(--f-cota); font-size: 13.5px; text-align: right; max-width: 22ch; }
+.aviso { margin: 0; font-size: 13.5px; color: var(--baja); }
+.obs { margin: 0; font-size: 14.5px; max-width: 62ch; }
+.obs b { font-family: var(--f-rotulo); font-weight: 600; letter-spacing: .06em; text-transform: uppercase; font-size: 12.5px; color: var(--tenue); display: block; margin-bottom: 3px; }
+.pie-ficha { margin: 0; padding-top: 12px; border-top: 1px solid var(--regla); color: var(--tenue); font-size: 13.5px; }
+.pie-ficha b { color: var(--tinta); font-family: var(--f-cota); font-weight: 500; }
+
+/* modo de toque y suma parcial */
+.modo { display: inline-flex; border: 1px solid var(--regla); border-radius: 999px; padding: 3px; gap: 2px; margin: 10px 16px 0; }
+.modo button { font: 600 13.5px/1 var(--f-rotulo); letter-spacing: .02em; color: var(--tenue); background: transparent; border: 0; border-radius: 999px; padding: 8px 14px; cursor: pointer; }
+.modo button[aria-pressed="true"] { background: var(--pluma); color: var(--hoja); }
+.lateral { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+.suma { padding: 16px; display: flex; flex-direction: column; gap: 12px; border-color: var(--pluma); }
+.suma .sobre { font-size: 12.5px; color: var(--pluma); }
+.suma .valor { color: var(--pluma); }
+.suma-lista { list-style: none; margin: 0; padding: 0; max-height: 264px; overflow-y: auto; }
+.suma-lista li { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 10px; align-items: center; padding: 5px 0; border-bottom: 1px solid var(--regla); font-size: 14px; }
+.suma-lista .num { font-size: 13.5px; }
+.quitar { font: 500 12.5px/1 var(--f-texto); color: var(--tenue); background: transparent; border: 1px solid var(--regla); border-radius: 5px; padding: 5px 8px; cursor: pointer; }
+.quitar:hover, .boton:hover { border-color: var(--tenue); }
+.acciones { display: flex; flex-wrap: wrap; gap: 8px; }
+.boton { font: 600 13.5px/1.1 var(--f-rotulo); letter-spacing: .02em; color: var(--tinta); background: transparent; border: 1px solid var(--regla); border-radius: 6px; padding: 9px 12px; cursor: pointer; }
+.boton.fuerte { background: var(--pluma); border-color: var(--pluma); color: var(--hoja); }
+.copia { width: 100%; font: 12.5px/1.4 var(--f-cota); color: var(--tinta); background: var(--papel); border: 1px solid var(--regla); border-radius: 4px; padding: 8px; resize: vertical; }
+.sumado { fill: var(--pluma); fill-opacity: .2; stroke: var(--pluma); stroke-width: 2.6; stroke-linejoin: round; pointer-events: none; }
+.n-lote.sum { fill: var(--pluma); }
+.llave .marca.sumado { fill: var(--pluma); fill-opacity: .6; stroke: none; }
+.barra { position: fixed; left: 0; right: 0; bottom: 0; z-index: 5; background: var(--tinta); color: var(--hoja); display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px 18px; padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px)); font-size: 14.5px; }
+.barra .v { font-family: var(--f-cota); font-weight: 500; font-size: 17px; white-space: nowrap; }
+.barra button { font: 600 13px/1 var(--f-rotulo); letter-spacing: .02em; color: var(--hoja); background: transparent; border: 1px solid var(--tenue); border-radius: 6px; padding: 8px 11px; cursor: pointer; }
+.barra button:focus-visible { outline-color: var(--hoja); }
+body.con-barra .pagina { padding-block-end: 120px; }
+input[type="checkbox"] { width: 18px; height: 18px; margin: 0; accent-color: var(--pluma); cursor: pointer; vertical-align: middle; }
+td.c, th.c { width: 1%; padding-right: 2px; }
+tr.fila.marcada td.d { color: var(--pluma); font-weight: 500; }
+tr.parcial td { color: var(--pluma); font-weight: 600; font-size: 16px; border-bottom: 0; }
+
+/* tabla */
+.tabla-caja { overflow-x: auto; padding: 4px 16px 14px; }
+table { border-collapse: collapse; width: 100%; font-size: 14.5px; }
+th { font: 600 12.5px/1.2 var(--f-rotulo); letter-spacing: .08em; text-transform: uppercase; color: var(--tenue); text-align: left; padding: 10px 8px 8px; border-bottom: 1.5px solid var(--tinta); }
+th.d, td.d { text-align: right; }
+td:last-child, th:last-child { width: 1%; white-space: nowrap; }
+td { padding: 7px 8px; border-bottom: 1px solid var(--regla); vertical-align: middle; }
+td.d { font-family: var(--f-cota); font-variant-numeric: tabular-nums; white-space: nowrap; }
+tr.fila { cursor: pointer; }
+tr.fila:hover td { background: var(--pluma-suave); }
+tr.fila.activa td { background: var(--pluma-suave); box-shadow: inset 0 0 0 0 transparent; }
+tr.fila.activa td:first-child { box-shadow: inset 3px 0 0 var(--pluma); }
+tr.fila:focus-visible { outline-offset: -2px; }
+tr.sub td { font-weight: 600; background: var(--papel); border-bottom: 1.5px solid var(--tinta); }
+tr.total td { font-weight: 600; font-size: 16px; border-bottom: 0; padding-top: 12px; background: transparent; }
+tr.sub.fuerte td { font-size: 15.5px; border-bottom-width: 2px; }
+tr.cab-calles td { font: 600 12.5px/1.2 var(--f-rotulo); letter-spacing: .08em; text-transform: uppercase; color: var(--tenue); padding: 18px 8px 8px; border-bottom: 1.5px solid var(--tinta); }
+tr.fila-calle td:nth-child(2) { font-weight: 500; }
+td .chip { font-size: 12px; padding: 4px 8px 4px 6px; }
+
+.notas { color: var(--tenue); font-size: 13.5px; max-width: 78ch; display: flex; flex-direction: column; gap: 6px; }
+.notas p { margin: 0; }
+@media (prefers-reduced-motion: no-preference) { .lote, .llave .mz, tr.fila td { transition: fill .12s, background-color .12s; } }
+</style>
+
+<div class="pagina">
+  <header class="cab">
+    <p class="sobre">Fraccionamiento Rústico Campestre Los Sauces</p>
+    <h1>Franja oriente</h1>
+    <ul class="resumen" id="resumen"></ul>
+    <p class="fuente" id="fuente"></p>
+  </header>
+
+  <section class="hoja" aria-label="Plano general de la franja">
+    <div class="hoja-cab"><h2>Plano general</h2><p class="nota">Toca una manzana para verla en detalle.</p></div>
+    <div class="pestanas" id="pestanas" role="group" aria-label="Manzanas"></div>
+    <div class="lienzo" id="lienzo-llave"></div>
+  </section>
+
+  <div class="trabajo">
+    <section class="hoja" aria-label="Detalle de la manzana">
+      <div class="hoja-cab"><h2 id="mz-titulo"></h2><p class="nota num" id="mz-sub"></p></div>
+      <div class="modo" role="group" aria-label="Qué pasa al tocar un lote">
+        <button type="button" id="modo-ficha" aria-pressed="true">Ver ficha</button>
+        <button type="button" id="modo-suma" aria-pressed="false">Sumar lotes</button>
+      </div>
+      <div class="lienzo" id="lienzo-detalle"></div>
+      <p class="nota" id="desliza" style="padding: 0 16px 6px" hidden>Desliza el dibujo hacia los lados para ver la manzana completa.</p>
+      <p class="nota" id="ayuda" style="padding: 0 16px 12px">Cotas en metros. La avenida queda arriba y el lindero oriente abajo, igual que en la copia en papel. Toca un lote para ver su ficha.</p>
+    </section>
+    <div class="lateral">
+      <section class="hoja suma" id="suma" aria-label="Suma parcial de lotes marcados" hidden></section>
+      <aside class="hoja ficha" id="ficha" aria-live="polite"></aside>
+    </div>
+  </div>
+
+  <section class="hoja" aria-label="Lista de lotes">
+    <div class="hoja-cab"><h2>Lista de lotes</h2><p class="nota">Marca las casillas para sumar lotes, calles o manzanas completas.</p></div>
+    <div class="tabla-caja">
+      <table>
+        <thead><tr><th class="c"><span aria-hidden="true">Σ</span></th><th>Lote</th><th class="d">Superficie (m²)</th><th>Confianza</th></tr></thead>
+        <tbody id="cuerpo"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <footer class="notas">
+    <p>Reconstrucción de gabinete hecha con las cotas de una copia en papel del plano. No sustituye escrituras ni un levantamiento topográfico.</p>
+    <p>Las cinco calles entre manzanas se cerraron con los lados de las manzanas vecinas, la línea de la avenida y el lindero oriente. Su superficie es estimada: el plano no acota su ancho (unos 10 m, y unos 15 m la que separa la 20B de la franja final).</p>
+    <p>El plano no muestra norte ni coordenadas, así que el dibujo no está orientado ni georreferenciado. Las calles transversales no tienen cota: sus anchos (unos 10 m, y unos 15 m la última) se dedujeron de la convergencia entre la avenida y el lindero.</p>
+  </footer>
+</div>
+<div class="barra" id="barra" role="status" hidden></div>
+
+<script>
+const D = {"fecha":"12-oct-2026","hoja":"https://docs.google.com/spreadsheets/d/1EScNtx_ig8A8fT5hVzKlIjJikJY4-NTZeoWrECn5EWM/edit","total":46731.09,"smax":799.37,"base_calle":100,"total_calles":3707.23,"total_todo":50438.32,"manzanas":[{"key":"9","nombre":"Manzana 9","corto":"9","s0":0,"s1":100,"wmax":108.17,"outline":[[0,0],[100,0],[100,96.9],[0,108.17]],"lots":[0,1,2,3,4,5,6,7],"subtotal":10253.25,"n":8},{"key":"12","nombre":"Manzana 12","corto":"12","s0":110,"s1":210,"wmax":95.78,"outline":[[110,0],[210,0],[210,84.51],[110,95.78]],"lots":[8,9,10,11,12,13,14],"subtotal":9014.25,"n":7},{"key":"15","nombre":"Manzana 15","corto":"15","s0":220,"s1":320,"wmax":83.39,"outline":[[220,0],[320,0],[320,72.12],[220,83.39]],"lots":[15,16,17,18,19,20],"subtotal":7775.25,"n":6},{"key":"18","nombre":"Manzana 18","corto":"18","s0":330,"s1":430,"wmax":70.99,"outline":[[330,0],[430,0],[430,59.72],[330,70.99]],"lots":[21,22,23,24],"subtotal":6535.25,"n":4},{"key":"20B","nombre":"Manzana 20B","corto":"20B","s0":440,"s1":600,"wmax":58.59,"outline":[[440,0],[600,0],[600,40.75],[550,46.19],[490,52.95],[440,58.59]],"lots":[25,26,27,28],"subtotal":7936.2,"n":4},{"key":"F","nombre":"Franja final","corto":"Final","s0":615,"s1":799.369,"wmax":38.88,"outline":[[615,0],[797.56,0.0],[799.369,18.1],[685,30.96],[665,33.22],[615,38.88]],"lots":[29,30,31],"subtotal":5216.89,"n":3}],"lotes":[{"i":0,"id":"Manzana 9, Lote 1","mz":"9","num":"1","sup":2000.0,"calc":2000.0,"nivel":"alta","obs":"Alta: superficie impresa legible (2,000) y coincide con sus medidas de 40 × 50 m.","poly":[[0,0],[50,0],[50,40],[0,40]],"c":[25.0,20.0],"medidas":[{"k":"Medidas","v":"40.00 × 50.00 m"},{"k":"Posición","v":"frente a la avenida"}],"borde":false},{"i":1,"id":"Manzana 9, Lote 2","mz":"9","num":"2","sup":1000.0,"calc":1000.0,"nivel":"alta","obs":"Alta: superficie impresa legible (1,000) y coincide con sus medidas de 20 × 50 m.","poly":[[0,40],[50,40],[50,60],[0,60]],"c":[25.0,50.0],"medidas":[{"k":"Medidas","v":"20.00 × 50.00 m"},{"k":"Posición","v":"interior"}],"borde":false},{"i":2,"id":"Manzana 9, Lote 3","mz":"9","num":"3","sup":1000.0,"calc":1000.0,"nivel":"alta","obs":"Alta: superficie impresa legible (1,000) y coincide con sus medidas de 20 × 50 m.","poly":[[0,60],[50,60],[50,80],[0,80]],"c":[25.0,70.0],"medidas":[{"k":"Medidas","v":"20.00 × 50.00 m"},{"k":"Posición","v":"interior"}],"borde":false},{"i":3,"id":"Manzana 9, Lote 4","mz":"9","num":"4","sup":1267.5,"calc":1267.5,"nivel":"alta","obs":"Alta: impresa 1,267.5 con el último dígito borroso; coincide con sus anchos de 28.17 y 22.53 m por 50 m de fondo.","poly":[[0,80],[50,80],[50,102.53],[0,108.17]],"c":[24.073,92.727],"medidas":[{"k":"Ancho hacia A","v":"28.17 m"},{"k":"Ancho hacia B","v":"22.53 m"},{"k":"Fondo paralelo a la avenida","v":"50.00 m"},{"k":"Lado sobre el lindero oriente","v":"50.32 m"}],"borde":true},{"i":4,"id":"Manzana 9, Lote 6","mz":"9","num":"6","sup":2000.0,"calc":2000.0,"nivel":"alta","obs":"Alta: superficie impresa legible (2,000) y coincide con sus medidas de 40 × 50 m.","poly":[[50,0],[100,0],[100,40],[50,40]],"c":[75.0,20.0],"medidas":[{"k":"Medidas","v":"40.00 × 50.00 m"},{"k":"Posición","v":"frente a la avenida"}],"borde":false},{"i":5,"id":"Manzana 9, Lote 7","mz":"9","num":"7","sup":1000.0,"calc":1000.0,"nivel":"alta","obs":"Alta: superficie impresa legible (1,000). La cota de su ancho está borrosa, pero la manzana cierra con 20 m.","poly":[[50,40],[100,40],[100,60],[50,60]],"c":[75.0,50.0],"medidas":[{"k":"Medidas","v":"20.00 × 50.00 m"},{"k":"Posición","v":"interior"}],"borde":false},{"i":6,"id":"Manzana 9, Lote 8","mz":"9","num":"8","sup":1000.0,"calc":1000.0,"nivel":"alta","obs":"Alta: superficie impresa legible (1,000) y coincide con sus medidas de 20 × 50 m.","poly":[[50,60],[100,60],[100,80],[50,80]],"c":[75.0,70.0],"medidas":[{"k":"Medidas","v":"20.00 × 50.00 m"},{"k":"Posición","v":"interior"}],"borde":false},{"i":7,"id":"Manzana 9, Lote 9","mz":"9","num":"9","sup":985.75,"calc":985.75,"nivel":"media","obs":"Media: la cifra impresa está muy borrosa. El valor sale de sus anchos (22.53 y 16.90 m) por 50 m de fondo, y cierra con el lado oriente de 50.31 m y con el ancho de la manzana 12.","poly":[[50,80],[100,80],[100,96.9],[50,102.53]],"c":[73.81,89.924],"medidas":[{"k":"Ancho hacia A","v":"22.53 m"},{"k":"Ancho hacia B","v":"16.90 m"},{"k":"Fondo paralelo a la avenida","v":"50.00 m"},{"k":"Lado sobre el lindero oriente","v":"50.31 m"}],"borde":true},{"i":8,"id":"Manzana 12, Lote 1","mz":"12","num":"1","sup":2000.0,"calc":2000.0,"nivel":"alta","obs":"Alta: impresa parcialmente borrosa (se lee 2,00?); coincide con sus medidas de 40 × 50 m.","poly":[[110,0],[160,0],[160,40],[110,40]],"c":[135.0,20.0],"medidas":[{"k":"Medidas","v":"40.00 × 50.00 m"},{"k":"Posición","v":"frente a la avenida"}],"borde":false},{"i":9,"id":"Manzana 12, Lote 2","mz":"12","num":"2","sup":1000.0,"calc":1000.0,"nivel":"alta","obs":"Alta: superficie impresa legible (1,000) y coincide con sus medidas de 20 × 50 m.","poly":[[110,40],[160,40],[160,60],[110,60]],"c":[135.0,50.0],"medidas":[{"k":"Medidas","v":"20.00 × 50.00 m"},{"k":"Posición","v":"interior"}],"borde":false},{"i":10,"id":"Manzana 12, Lote 3","mz":"12","num":"3","sup":1000.0,"calc":1000.0,"nivel":"media","obs":"Media: la superficie impresa no se alcanza a leer. El valor sale de sus medidas de 20 × 50 m.","poly":[[110,60],[160,60],[160,80],[110,80]],"c":[135.0,70.0],"medidas":[{"k":"Medidas","v":"20.00 × 50.00 m"},{"k":"Posición","v":"interior"}],"borde":false},{"i":11,"id":"Manzana 12, Lote 4","mz":"12","num":"4","sup":648.0,"calc":648.0,"nivel":"alta","obs":"Alta: superficie impresa legible (648.00) y coincide con sus anchos de 15.78 y 10.14 m por 50 m de fondo.","poly":[[110,80],[160,80],[160,90.14],[110,95.78]],"c":[133.187,86.582],"medidas":[{"k":"Ancho hacia A","v":"15.78 m"},{"k":"Ancho hacia B","v":"10.14 m"},{"k":"Fondo paralelo a la avenida","v":"50.00 m"},{"k":"Lado sobre el lindero oriente","v":"50.32 m"}],"borde":true},{"i":12,"id":"Manzana 12, Lote 6","mz":"12","num":"6","sup":2000.0,"calc":2000.0,"nivel":"alta","obs":"Alta: superficie impresa legible (2,000) y coincide con sus medidas de 40 × 50 m.","poly":[[160,0],[210,0],[210,40],[160,40]],"c":[185.0,20.0],"medidas":[{"k":"Medidas","v":"40.00 × 50.00 m"},{"k":"Posición","v":"frente a la avenida"}],"borde":false},{"i":13,"id":"Manzana 12, Lote 7","mz":"12","num":"7","sup":1000.0,"calc":1000.0,"nivel":"alta","obs":"Alta: superficie impresa legible (1,000) y coincide con sus medidas de 20 × 50 m. Tiene un recuadro a pluma en el plano.","poly":[[160,40],[210,40],[210,60],[160,60]],"c":[185.0,50.0],"medidas":[{"k":"Medidas","v":"20.00 × 50.00 m"},{"k":"Posición","v":"interior"}],"borde":false},{"i":14,"id":"Manzana 12, Lote 8","mz":"12","num":"8","sup":1366.25,"calc":1366.25,"nivel":"baja","obs":"Baja: el plano imprime 1,136.25 (o 1,138.26), pero sus medidas (anchos de 30.14 y 24.51 m por 50 m de fondo) dan 1,366.25, que es el valor anotado aquí y el único con el que cierra la suma de la manzana. Diferencia de 230 m². Verificar contra escritura.","poly":[[160,60],[210,60],[210,84.51],[160,90.14]],"c":[184.142,73.711],"medidas":[{"k":"Ancho hacia A","v":"30.14 m (20.00 + 10.14)"},{"k":"Ancho hacia B","v":"24.51 m"},{"k":"Fondo paralelo a la avenida","v":"50.00 m"},{"k":"Lado sobre el lindero oriente","v":"50.31 m"}],"borde":true},{"i":15,"id":"Manzana 15, Lote 1","mz":"15","num":"1","sup":2000.0,"calc":2000.0,"nivel":"alta","obs":"Alta: superficie impresa legible (2,000) y coincide con sus medidas de 40 × 50 m.","poly":[[220,0],[270,0],[270,40],[220,40]],"c":[245.0,20.0],"medidas":[{"k":"Medidas","v":"40.00 × 50.00 m"},{"k":"Posición","v":"frente a la avenida"}],"borde":false},{"i":16,"id":"Manzana 15, Lote 2","mz":"15","num":"2","sup":1000.0,"calc":1000.0,"nivel":"alta","obs":"Alta: impresa con un dígito borroso; coincide con sus medidas de 20 × 50 m.","poly":[[220,40],[270,40],[270,60],[220,60]],"c":[245.0,50.0],"medidas":[{"k":"Medidas","v":"20.00 × 50.00 m"},{"k":"Posición","v":"interior"}],"borde":false},{"i":17,"id":"Manzana 15, Lote 3","mz":"15","num":"3","sup":1028.5,"calc":1028.5,"nivel":"alta","obs":"Alta: impresa con dígitos intermedios borrosos (se lee 10?8.5); coincide con sus anchos de 23.39 y 17.75 m por 50 m de fondo.","poly":[[220,60],[270,60],[270,77.75],[220,83.39]],"c":[243.858,70.349],"medidas":[{"k":"Ancho hacia A","v":"23.39 m"},{"k":"Ancho hacia B","v":"17.75 m"},{"k":"Fondo paralelo a la avenida","v":"50.00 m"},{"k":"Lado sobre el lindero oriente","v":"50.32 m"}],"borde":true},{"i":18,"id":"Manzana 15, Lote 4","mz":"15","num":"4","sup":2000.0,"calc":2000.0,"nivel":"alta","obs":"Alta: impresa con el primer dígito borroso; coincide con sus medidas de 40 × 50 m.","poly":[[270,0],[320,0],[320,40],[270,40]],"c":[295.0,20.0],"medidas":[{"k":"Medidas","v":"40.00 × 50.00 m"},{"k":"Posición","v":"frente a la avenida"}],"borde":false},{"i":19,"id":"Manzana 15, Lote 5","mz":"15","num":"5","sup":1000.0,"calc":1000.0,"nivel":"alta","obs":"Alta: impresa con el último dígito borroso; coincide con sus medidas de 20 × 50 m.","poly":[[270,40],[320,40],[320,60],[270,60]],"c":[295.0,50.0],"medidas":[{"k":"Medidas","v":"20.00 × 50.00 m"},{"k":"Posición","v":"interior"}],"borde":false},{"i":20,"id":"Manzana 15, Lote 6","mz":"15","num":"6","sup":746.75,"calc":746.75,"nivel":"alta","obs":"Alta: impresa con un decimal borroso (se lee 746.?5); coincide con sus anchos de 17.75 y 12.12 m por 50 m de fondo.","poly":[[270,60],[320,60],[320,72.12],[270,77.75]],"c":[293.429,67.556],"medidas":[{"k":"Ancho hacia A","v":"17.75 m"},{"k":"Ancho hacia B","v":"12.12 m"},{"k":"Fondo paralelo a la avenida","v":"50.00 m"},{"k":"Lado sobre el lindero oriente","v":"50.31 m"}],"borde":true},{"i":21,"id":"Manzana 18, Lote 1","mz":"18","num":"1","sup":2000.0,"calc":2000.0,"nivel":"alta","obs":"Alta: superficie impresa legible (2,000) y coincide con sus medidas de 40 × 50 m.","poly":[[330,0],[380,0],[380,40],[330,40]],"c":[355.0,20.0],"medidas":[{"k":"Medidas","v":"40.00 × 50.00 m"},{"k":"Posición","v":"frente a la avenida"}],"borde":false},{"i":22,"id":"Manzana 18, Lote 2","mz":"18","num":"2","sup":1408.5,"calc":1408.5,"nivel":"media","obs":"Media: impresa 1,408.? con el decimal borroso, y cotas de ancho parcialmente borrosas. El valor cierra con anchos de 30.99 y 25.35 m por 50 m de fondo y con el ancho de la manzana 15.","poly":[[330,40],[380,40],[380,65.35],[330,70.99]],"c":[354.166,54.132],"medidas":[{"k":"Ancho hacia A","v":"30.99 m"},{"k":"Ancho hacia B","v":"25.35 m"},{"k":"Fondo paralelo a la avenida","v":"50.00 m"},{"k":"Lado sobre el lindero oriente","v":"50.32 m"}],"borde":true},{"i":23,"id":"Manzana 18, Lote 5","mz":"18","num":"5","sup":2000.0,"calc":2000.0,"nivel":"alta","obs":"Alta: impresa parcialmente borrosa; coincide con sus medidas de 40 × 50 m.","poly":[[380,0],[430,0],[430,40],[380,40]],"c":[405.0,20.0],"medidas":[{"k":"Medidas","v":"40.00 × 50.00 m"},{"k":"Posición","v":"frente a la avenida"}],"borde":false},{"i":24,"id":"Manzana 18, Lote 6","mz":"18","num":"6","sup":1126.75,"calc":1126.75,"nivel":"media","obs":"Media: los primeros dígitos impresos están borrosos (se lee ?126.75 o ?128.75). El valor cierra con anchos de 25.35 y 19.72 m por 50 m de fondo.","poly":[[380,40],[430,40],[430,59.72],[380,65.35]],"c":[403.959,51.326],"medidas":[{"k":"Ancho hacia A","v":"25.35 m"},{"k":"Ancho hacia B","v":"19.72 m"},{"k":"Fondo paralelo a la avenida","v":"50.00 m"},{"k":"Lado sobre el lindero oriente","v":"50.31 m"}],"borde":true},{"i":25,"id":"Manzana 20B, lote sin número visible (lado avenida)","mz":"20B","num":"s/n","sup":2000.0,"calc":2000.0,"nivel":"alta","obs":"Alta: impresa parcialmente borrosa; coincide con sus medidas de 40 × 50 m. El número de lote no se ve en el plano.","poly":[[440,0],[490,0],[490,40],[440,40]],"c":[465.0,20.0],"medidas":[{"k":"Medidas","v":"40.00 × 50.00 m"},{"k":"Posición","v":"frente a la avenida"}],"borde":false},{"i":26,"id":"Manzana 20B, lote sin número visible (lado lindero oriente)","mz":"20B","num":"s/n","sup":788.5,"calc":788.5,"nivel":"alta","obs":"Alta: impresa 788.50 con un dígito borroso; coincide con sus anchos de 18.59 y 12.95 m por 50 m de fondo. El número de lote no se ve en el plano.","poly":[[440,40],[490,40],[490,52.95],[440,58.59]],"c":[463.51,47.969],"medidas":[{"k":"Ancho hacia A","v":"18.59 m"},{"k":"Ancho hacia B","v":"12.95 m"},{"k":"Fondo paralelo a la avenida","v":"50.00 m"},{"k":"Lado sobre el lindero oriente","v":"50.32 m"}],"borde":true},{"i":27,"id":"Manzana 20B, Lote 14","mz":"20B","num":"14","sup":2974.2,"calc":2974.2,"nivel":"alta","obs":"Alta: superficie impresa legible (2,974.20) y coincide con sus anchos de 52.95 y 46.19 m por 60 m de fondo.","poly":[[490,0],[550,0],[550,46.19],[490,52.95]],"c":[519.318,24.823],"medidas":[{"k":"Ancho hacia A","v":"52.95 m"},{"k":"Ancho hacia B","v":"46.19 m"},{"k":"Frente sobre la avenida","v":"60.00 m"},{"k":"Lado sobre el lindero oriente","v":"60.36 m"}],"borde":true},{"i":28,"id":"Manzana 20B, Lote 23","mz":"20B","num":"23","sup":2173.5,"calc":2173.5,"nivel":"media","obs":"Media: los dos dígitos centrales impresos están borrosos (se lee 2??8.50) y la cota del ancho menor también (40.55 o 40.75). Con 40.55 m la superficie es 2,168.50; con 40.75 m sería 2,173.50.","poly":[[550,0],[600,0],[600,40.75],[550,46.19]],"c":[574.479,21.763],"medidas":[{"k":"Ancho hacia A","v":"46.19 m"},{"k":"Ancho hacia B","v":"40.75 m"},{"k":"Frente sobre la avenida","v":"50.00 m"},{"k":"Lado sobre el lindero oriente","v":"50.31 m"}],"borde":true},{"i":29,"id":"Franja final (manzana sin número visible), Lote 6","mz":"F","num":"6","sup":1802.5,"calc":1802.5,"nivel":"media","obs":"Media: el plano muestra 1,802 sin decimales visibles. Sus anchos de 38.88 y 33.22 m por 50 m de fondo dan 1,802.50; la diferencia posible es de 0.5 m². La numeración de los lotes de esta franja continúa la de la manzana 22A.","poly":[[615,0],[665,0],[665,33.22],[615,38.88]],"c":[639.346,18.062],"medidas":[{"k":"Ancho hacia A","v":"38.88 m"},{"k":"Ancho hacia B","v":"33.22 m"},{"k":"Frente sobre la avenida","v":"50.00 m"},{"k":"Lado sobre el lindero oriente","v":"50.31 m"}],"borde":true},{"i":30,"id":"Franja final (manzana sin número visible), Lote 11","mz":"F","num":"11","sup":641.8,"calc":641.8,"nivel":"media","obs":"Media: el dígito central impreso está borroso (se lee 6?1.80), igual que el último dígito de sus anchos. El valor cierra con anchos de 33.22 y 30.96 m por 20 m de fondo.","poly":[[665,0],[685,0],[685,30.96],[665,33.22]],"c":[674.883,16.052],"medidas":[{"k":"Ancho hacia A","v":"33.22 m"},{"k":"Ancho hacia B","v":"30.96 m"},{"k":"Frente sobre la avenida","v":"20.00 m"},{"k":"Lado sobre el lindero oriente","v":"sin cota en el plano (20.13 m por cálculo)"}],"borde":true},{"i":31,"id":"Franja final (manzana sin número visible), Lote 16","mz":"F","num":"16","sup":2772.59,"calc":2789.09,"nivel":"","obs":"Lados largos (112.56 y 115.09 m) . Con anchos de 30.96 y 18.19 m","poly":[[685,0],[797.56,0.0],[799.369,18.1],[685.0,30.96]],"c":[736.826,12.584],"medidas":[{"k":"Ancho hacia A","v":"30.96 m"},{"k":"Remate en la punta (vértice B)","v":"18.19 m"},{"k":"Frente sobre la avenida","v":"112.56 m"},{"k":"Lado sobre el lindero oriente","v":"115.09 m"}],"borde":true}],"calles":[{"i":100,"mzN":"9","mzS":"12","sa":100,"sb":110,"corto":"Calle 9–12","id":"Calle entre la manzana 9 y la manzana 12","sup":963.4,"calc":963.4,"nivel":"est","obs":"Superficie estimada. El plano no acota esta calle: su ancho de ≈10 m se dedujo de la convergencia entre la avenida y el lindero oriente. Sus lados sobre las manzanas (96.90 y 95.78 m) sí vienen en el plano.","poly":[[100,0.0],[110,0.0],[110,95.78],[100,96.9]],"c":[104.99,48.171],"medidas":[{"k":"Lado sobre la manzana 9 (su lado sur)","v":"96.90 m"},{"k":"Lado sobre la manzana 12 (su lado norte)","v":"95.78 m"},{"k":"Ancho sobre la avenida","v":"≈10.00 m (deducido)"},{"k":"Lado sobre el lindero oriente","v":"≈10.06 m (calculado)"}]},{"i":101,"mzN":"12","mzS":"15","sa":210,"sb":220,"corto":"Calle 12–15","id":"Calle entre la manzana 12 y la manzana 15","sup":839.5,"calc":839.5,"nivel":"est","obs":"Superficie estimada. El plano no acota esta calle: su ancho de ≈10 m se dedujo de la convergencia entre la avenida y el lindero oriente. Sus lados sobre las manzanas (84.51 y 83.39 m) sí vienen en el plano.","poly":[[210,0.0],[220,0.0],[220,83.39],[210,84.51]],"c":[214.989,41.976],"medidas":[{"k":"Lado sobre la manzana 12 (su lado sur)","v":"84.51 m"},{"k":"Lado sobre la manzana 15 (su lado norte)","v":"83.39 m"},{"k":"Ancho sobre la avenida","v":"≈10.00 m (deducido)"},{"k":"Lado sobre el lindero oriente","v":"≈10.06 m (calculado)"}]},{"i":102,"mzN":"15","mzS":"18","sa":320,"sb":330,"corto":"Calle 15–18","id":"Calle entre la manzana 15 y la manzana 18","sup":715.55,"calc":715.55,"nivel":"est","obs":"Superficie estimada. El plano no acota esta calle: su ancho de ≈10 m se dedujo de la convergencia entre la avenida y el lindero oriente. Sus lados sobre las manzanas (72.12 y 70.99 m) sí vienen en el plano.","poly":[[320,0.0],[330,0.0],[330,70.99],[320,72.12]],"c":[324.987,35.778],"medidas":[{"k":"Lado sobre la manzana 15 (su lado sur)","v":"72.12 m"},{"k":"Lado sobre la manzana 18 (su lado norte)","v":"70.99 m"},{"k":"Ancho sobre la avenida","v":"≈10.00 m (deducido)"},{"k":"Lado sobre el lindero oriente","v":"≈10.06 m (calculado)"}]},{"i":103,"mzN":"18","mzS":"20B","sa":430,"sb":440,"corto":"Calle 18–20B","id":"Calle entre la manzana 18 y la manzana 20B","sup":591.55,"calc":591.55,"nivel":"est","obs":"Superficie estimada. El plano no acota esta calle: su ancho de ≈10 m se dedujo de la convergencia entre la avenida y el lindero oriente. Sus lados sobre las manzanas (59.72 y 58.59 m) sí vienen en el plano.","poly":[[430,0.0],[440,0.0],[440,58.59],[430,59.72]],"c":[434.984,29.578],"medidas":[{"k":"Lado sobre la manzana 18 (su lado sur)","v":"59.72 m"},{"k":"Lado sobre la manzana 20B (su lado norte)","v":"58.59 m"},{"k":"Ancho sobre la avenida","v":"≈10.00 m (deducido)"},{"k":"Lado sobre el lindero oriente","v":"≈10.06 m (calculado)"}]},{"i":104,"mzN":"20B","mzS":"F","sa":600,"sb":615,"corto":"Calle 20B–Final","id":"Calle entre la manzana 20B y la franja final","sup":597.23,"calc":597.23,"nivel":"est","obs":"Superficie estimada. El plano no acota esta calle: su ancho de ≈15 m se dedujo al ubicar la franja final. Con el ancho corregido de 40.75 m en la manzana 20B, la convergencia entre la avenida y el lindero daría unos 16.6 m de ancho y alrededor de 660 m². Sus lados sobre las manzanas (40.75 y 38.88 m) sí vienen en el plano.","poly":[[600,0.0],[615,0.0],[615,38.88],[600,40.75]],"c":[607.441,19.911],"medidas":[{"k":"Lado sobre la manzana 20B (su lado sur)","v":"40.75 m"},{"k":"Lado sobre la franja final (su lado norte)","v":"38.88 m"},{"k":"Ancho sobre la avenida","v":"≈15.00 m (deducido)"},{"k":"Lado sobre el lindero oriente","v":"≈15.12 m (calculado)"}]}],"cotas":[{"mz":"9","s":25.0,"w":0,"ns":0,"nw":1,"t":"50.00","r":"ave"},{"mz":"9","s":25.0,"w":105.35,"ns":0,"nw":-1,"t":"50.32","r":"este"},{"mz":"9","s":75.0,"w":0,"ns":0,"nw":1,"t":"50.00","r":"ave"},{"mz":"9","s":75.0,"w":99.715,"ns":0,"nw":-1,"t":"50.31","r":"este"},{"mz":"9","s":0,"w":20.0,"ns":1,"nw":0,"t":"40.00","r":"cruce"},{"mz":"9","s":0,"w":50.0,"ns":1,"nw":0,"t":"20.00","r":"cruce"},{"mz":"9","s":0,"w":70.0,"ns":1,"nw":0,"t":"20.00","r":"cruce"},{"mz":"9","s":0,"w":94.085,"ns":1,"nw":0,"t":"28.17","r":"cruce"},{"mz":"9","s":100,"w":20.0,"ns":-1,"nw":0,"t":"40.00","r":"cruce"},{"mz":"9","s":100,"w":50.0,"ns":-1,"nw":0,"t":"20.00","r":"cruce"},{"mz":"9","s":100,"w":70.0,"ns":-1,"nw":0,"t":"20.00","r":"cruce"},{"mz":"9","s":100,"w":88.45,"ns":-1,"nw":0,"t":"16.90","r":"cruce"},{"mz":"9","s":50,"w":91.265,"ns":-1,"nw":0,"t":"22.53","r":"cruce"},{"mz":"12","s":135.0,"w":0,"ns":0,"nw":1,"t":"50.00","r":"ave"},{"mz":"12","s":135.0,"w":92.96,"ns":0,"nw":-1,"t":"50.32","r":"este"},{"mz":"12","s":185.0,"w":0,"ns":0,"nw":1,"t":"50.00","r":"ave"},{"mz":"12","s":185.0,"w":87.325,"ns":0,"nw":-1,"t":"50.31","r":"este"},{"mz":"12","s":110,"w":20.0,"ns":1,"nw":0,"t":"40.00","r":"cruce"},{"mz":"12","s":110,"w":50.0,"ns":1,"nw":0,"t":"20.00","r":"cruce"},{"mz":"12","s":110,"w":70.0,"ns":1,"nw":0,"t":"20.00","r":"cruce"},{"mz":"12","s":110,"w":87.89,"ns":1,"nw":0,"t":"15.78","r":"cruce"},{"mz":"12","s":210,"w":20.0,"ns":-1,"nw":0,"t":"40.00","r":"cruce"},{"mz":"12","s":210,"w":50.0,"ns":-1,"nw":0,"t":"20.00","r":"cruce"},{"mz":"12","s":210,"w":72.255,"ns":-1,"nw":0,"t":"24.51","r":"cruce"},{"mz":"12","s":160,"w":85.07,"ns":-1,"nw":0,"t":"10.14","r":"cruce"},{"mz":"15","s":245.0,"w":0,"ns":0,"nw":1,"t":"50.00","r":"ave"},{"mz":"15","s":245.0,"w":80.57,"ns":0,"nw":-1,"t":"50.32","r":"este"},{"mz":"15","s":295.0,"w":0,"ns":0,"nw":1,"t":"50.00","r":"ave"},{"mz":"15","s":295.0,"w":74.935,"ns":0,"nw":-1,"t":"50.31","r":"este"},{"mz":"15","s":220,"w":20.0,"ns":1,"nw":0,"t":"40.00","r":"cruce"},{"mz":"15","s":220,"w":50.0,"ns":1,"nw":0,"t":"20.00","r":"cruce"},{"mz":"15","s":220,"w":71.695,"ns":1,"nw":0,"t":"23.39","r":"cruce"},{"mz":"15","s":320,"w":20.0,"ns":-1,"nw":0,"t":"40.00","r":"cruce"},{"mz":"15","s":320,"w":50.0,"ns":-1,"nw":0,"t":"20.00","r":"cruce"},{"mz":"15","s":320,"w":66.06,"ns":-1,"nw":0,"t":"12.12","r":"cruce"},{"mz":"15","s":270,"w":68.875,"ns":-1,"nw":0,"t":"17.75","r":"cruce"},{"mz":"18","s":355.0,"w":0,"ns":0,"nw":1,"t":"50.00","r":"ave"},{"mz":"18","s":355.0,"w":68.17,"ns":0,"nw":-1,"t":"50.32","r":"este"},{"mz":"18","s":405.0,"w":0,"ns":0,"nw":1,"t":"50.00","r":"ave"},{"mz":"18","s":405.0,"w":62.535,"ns":0,"nw":-1,"t":"50.31","r":"este"},{"mz":"18","s":330,"w":20.0,"ns":1,"nw":0,"t":"40.00","r":"cruce"},{"mz":"18","s":330,"w":55.495,"ns":1,"nw":0,"t":"30.99","r":"cruce"},{"mz":"18","s":430,"w":20.0,"ns":-1,"nw":0,"t":"40.00","r":"cruce"},{"mz":"18","s":430,"w":49.86,"ns":-1,"nw":0,"t":"19.72","r":"cruce"},{"mz":"18","s":380,"w":52.675,"ns":-1,"nw":0,"t":"25.35","r":"cruce"},{"mz":"20B","s":465.0,"w":0,"ns":0,"nw":1,"t":"50.00","r":"ave"},{"mz":"20B","s":520.0,"w":0,"ns":0,"nw":1,"t":"60.00","r":"ave"},{"mz":"20B","s":575.0,"w":0,"ns":0,"nw":1,"t":"50.00","r":"ave"},{"mz":"20B","s":465.0,"w":55.77,"ns":0,"nw":-1,"t":"50.32","r":"este"},{"mz":"20B","s":520.0,"w":49.57,"ns":0,"nw":-1,"t":"60.36","r":"este"},{"mz":"20B","s":575.0,"w":43.47,"ns":0,"nw":-1,"t":"50.31","r":"este"},{"mz":"20B","s":440,"w":20.0,"ns":1,"nw":0,"t":"40.00","r":"cruce"},{"mz":"20B","s":440,"w":49.295,"ns":1,"nw":0,"t":"18.59","r":"cruce"},{"mz":"20B","s":490,"w":20.0,"ns":-1,"nw":0,"t":"40.00","r":"cruce"},{"mz":"20B","s":490,"w":46.475,"ns":-1,"nw":0,"t":"12.95","r":"cruce"},{"mz":"20B","s":490,"w":26.475,"ns":1,"nw":0,"t":"52.95","r":"cruce"},{"mz":"20B","s":550,"w":23.095,"ns":-1,"nw":0,"t":"46.19","r":"cruce"},{"mz":"20B","s":600,"w":20.375,"ns":-1,"nw":0,"t":"40.75","r":"cruce"},{"mz":"F","s":640.0,"w":0,"ns":0,"nw":1,"t":"50.00","r":"ave"},{"mz":"F","s":675.0,"w":0,"ns":0,"nw":1,"t":"20.00","r":"ave"},{"mz":"F","s":741.28,"w":0,"ns":0,"nw":1,"t":"112.56","r":"ave"},{"mz":"F","s":640.0,"w":36.05,"ns":0,"nw":-1,"t":"50.31","r":"este"},{"mz":"F","s":742.185,"w":24.53,"ns":0,"nw":-1,"t":"115.09","r":"este"},{"mz":"F","s":615,"w":19.44,"ns":1,"nw":0,"t":"38.88","r":"cruce"},{"mz":"F","s":665,"w":16.61,"ns":-1,"nw":0,"t":"33.22","r":"cruce"},{"mz":"F","s":685,"w":15.48,"ns":1,"nw":0,"t":"30.96","r":"cruce"},{"mz":"F","s":798.465,"w":9.05,"ns":-1,"nw":0,"t":"18.19","r":"cruce"}]};
+const NS = "http://www.w3.org/2000/svg";
+const fmt = v => v.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const el = (tag, attrs, txt) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (txt != null) e.textContent = txt; return e; };
+const h = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
+const NIVEL = { alta: "Confianza alta", media: "Confianza media", baja: "Confianza baja", est: "Superficie estimada", "": "Sin nivel anotado" };
+const CORTO = { alta: "Alta", media: "Media", baja: "Baja", est: "Estimada", "": "Sin nivel" };
+const ANG = 6.44;
+const CLAVE = "franja-sauces-suma";
+const BASE = D.base_calle;
+let estado = { mz: "9", lote: 3, modo: "ficha" };
+let conj = new Set();      // lotes y calles marcados para la suma parcial
+let previo = null;         // último conjunto borrado, para poder deshacer
+
+const esCalle = i => i >= BASE;
+const item = i => esCalle(i) ? D.calles[i - BASE] : D.lotes[i];
+const valido = i => Number.isInteger(i) && ((i >= 0 && i < D.lotes.length) || (i >= BASE && i < BASE + D.calles.length));
+const CALLES = D.calles.map(C => C.i);
+function chip(nivel, corto) { const c = h("span", "chip " + (nivel || "sin")); c.appendChild(h("i")); c.appendChild(document.createTextNode((corto ? CORTO : NIVEL)[nivel])); return c; }
+function boton(id, txt, cls, fn) { const b = h("button", "boton" + (cls ? " " + cls : ""), txt); b.type = "button"; b.id = id; b.addEventListener("click", fn); return b; }
+function nombreLote(L) { return L.num === "s/n" ? (L.borde ? "Lote sin número (lado lindero)" : "Lote sin número (lado avenida)") : "Lote " + L.num; }
+function nombreMz(M) { return M.key === "F" ? "Franja final" : M.nombre; }
+function etiquetaCorta(L) {
+  if (esCalle(L.i)) return L.corto;
+  return nombreMz(mzDe(L.mz)) + " · " + (L.num === "s/n" ? (L.borde ? "s/n lado lindero" : "s/n lado avenida") : "Lote " + L.num);
+}
+function mzDe(key) { return D.manzanas.find(m => m.key === key); }
+function pts(poly, X, Y) { return poly.map(p => X(p[0]).toFixed(1) + "," + Y(p[1]).toFixed(1)).join(" "); }
+function sumaDe(ids) { return Math.round(ids.reduce((a, i) => a + item(i).sup, 0) * 100) / 100; }
+function plural(n, uno = "lote", varios = "lotes") { return n + " " + (n === 1 ? uno : varios); }
+function cuenta(ids) {
+  const nl = ids.filter(i => !esCalle(i)).length, nc = ids.filter(esCalle).length;
+  return [nl ? plural(nl) : "", nc ? plural(nc, "calle", "calles") : ""].filter(Boolean).join(" y ") || "0 lotes";
+}
+function guardar() { try { localStorage.setItem(CLAVE, JSON.stringify({ c: [...conj], m: estado.modo })); } catch (e) {} }
+
+function elegir(mz, lote) {
+  estado.mz = mz;
+  estado.lote = lote != null ? lote : mzDe(mz).lots[0];
+  pintar();
+}
+function alternar(i, poner) {
+  if (poner == null) poner = !conj.has(i);
+  if (poner) conj.add(i); else conj.delete(i);
+  previo = null; guardar();
+}
+function tocar(mz, i) {
+  estado.mz = mz; estado.lote = i;
+  if (estado.modo === "suma") alternar(i);
+  pintar();
+}
+function ponerModo(m) { estado.modo = m; guardar(); pintar(); }
+function activable(node, fn, etiqueta) {
+  node.setAttribute("tabindex", "0"); node.setAttribute("role", "button"); node.setAttribute("aria-label", etiqueta);
+  node.addEventListener("click", fn);
+  node.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fn(); } });
+}
+
+/* ---------- plano llave ---------- */
+function pintarLlave() {
+  const caja = document.getElementById("lienzo-llave");
+  const cw = Math.max(caja.clientWidth - 12, 300);
+  const padX = 22, top = 30, bot = 26;
+  const k = (cw - 2 * padX) / D.smax;
+  const W = cw, H = 108.17 * k + top + bot;
+  const X = s => padX + (D.smax - s) * k, Y = w => top + w * k;
+  const svg = el("svg", { width: W, height: H, viewBox: `0 0 ${W} ${H}`, class: "llave", role: "group", "aria-label": "Franja oriente completa: de la manzana 9, a la derecha, a la punta, a la izquierda" });
+  svg.appendChild(el("line", { class: "guia", x1: 4, x2: W - 4, y1: Y(0), y2: Y(0) }));
+  svg.appendChild(el("line", { class: "guia", x1: X(-8), y1: Y(108.17 + 0.1128 * 8), x2: X(D.smax), y2: Y(108.17 - 0.1128 * D.smax) }));
+  for (const C of D.calles) {
+    const p = el("polygon", { class: "calle-llave" + (conj.has(C.i) ? " sumado" : ""), points: pts(C.poly, X, Y) });
+    activable(p, () => elegir(C.mzN, C.i), `${C.id}, ${fmt(C.sup)} metros cuadrados`);
+    svg.appendChild(p);
+  }
+  for (const M of D.manzanas) {
+    const g = el("g", {});
+    const p = el("polygon", { class: "mz" + (M.key === estado.mz ? " activa" : ""), points: pts(M.outline, X, Y) });
+    activable(p, () => elegir(M.key), `${M.nombre}, ${M.n} lotes, ${fmt(M.subtotal)} metros cuadrados`);
+    g.appendChild(p);
+    for (const i of M.lots) {
+      const L = D.lotes[i];
+      if (conj.has(i)) g.appendChild(el("polygon", { class: "marca sumado", points: pts(L.poly, X, Y) }));
+      else if (L.nivel === "media" || L.nivel === "baja") g.appendChild(el("polygon", { class: "marca " + L.nivel, points: pts(L.poly, X, Y) }));
+      g.appendChild(el("polygon", { class: "fino", points: pts(L.poly, X, Y) }));
+    }
+    const xm = X((M.s0 + Math.min(M.s1, 797.56)) / 2);
+    g.appendChild(el("text", { class: "mz-n", x: xm, y: top - 10, "text-anchor": "middle", "font-size": 14 }, M.corto));
+    svg.appendChild(g);
+  }
+  svg.appendChild(el("text", { x: X(0) + 2, y: H - 8, "text-anchor": "end", "font-size": 10.5 }, "hacia el vértice A (Mojón) →"));
+  svg.appendChild(el("text", { x: X(D.smax) - 2, y: H - 8, "text-anchor": "start", "font-size": 10.5 }, "← punta (vértice B)"));
+  caja.replaceChildren(svg);
+}
+
+/* ---------- detalle de la manzana, con sus calles vecinas ---------- */
+function pintarDetalle() {
+  const M = mzDe(estado.mz), sumando = estado.modo === "suma";
+  const calles = D.calles.filter(C => C.mzN === M.key || C.mzS === M.key);
+  document.getElementById("mz-titulo").textContent = M.key === "F" ? "Franja final (manzana sin número visible)" : M.nombre;
+  document.getElementById("mz-sub").textContent = `${M.n} lotes · ${fmt(M.subtotal)} m²`;
+  const caja = document.getElementById("lienzo-detalle");
+  const cw = Math.max(caja.clientWidth - 12, 280);
+  const sMin = Math.min(M.s0, ...calles.map(C => C.sa)), sMax = Math.max(M.s1, ...calles.map(C => C.sb));
+  const wmax = Math.max(M.wmax, ...calles.map(C => Math.max(...C.poly.map(p => p[1]))));
+  const padL = 16, padR = 16, top = 46, bot = 38;
+  const Lm = sMax - sMin;
+  const k = Math.max((cw - padL - padR) / Lm, 3.5);
+  const W = Lm * k + padL + padR, H = wmax * k + top + bot;
+  const X = s => padL + (sMax - s) * k, Y = w => top + w * k;
+  const svg = el("svg", { width: W, height: H, viewBox: `0 0 ${W} ${H}`, role: "group", "aria-label": "Lotes de " + M.nombre + " y calles vecinas" });
+  const defs = el("defs", {});
+  const pat = el("pattern", { id: "raya", width: 9, height: 9, patternUnits: "userSpaceOnUse", patternTransform: "rotate(45)" });
+  pat.appendChild(el("line", { class: "raya", x1: 0, y1: 0, x2: 0, y2: 9 }));
+  defs.appendChild(pat); svg.appendChild(defs);
+  svg.appendChild(el("line", { class: "guia", x1: 2, x2: W - 2, y1: Y(0), y2: Y(0) }));
+  svg.appendChild(el("text", { class: "rot", x: W / 2, y: 16, "text-anchor": "middle", "font-size": 12 }, "AVENIDA DE LOS SAUCES SUR"));
+  svg.appendChild(el("text", { x: W - 4, y: 36, "text-anchor": "end", "font-size": 10.5 }, "hacia A →"));
+  svg.appendChild(el("text", { x: 4, y: 36, "text-anchor": "start", "font-size": 10.5 }, "← hacia la punta (B)"));
+  for (const C of calles) {
+    const p = el("polygon", { class: "calle", points: pts(C.poly, X, Y) });
+    const marcado = conj.has(C.i);
+    activable(p, () => tocar(M.key, C.i), `${C.id}: ${fmt(C.sup)} metros cuadrados, superficie estimada.` + (sumando ? (marcado ? " Está en la suma; toca para quitarla." : " Toca para sumarla.") : ""));
+    if (sumando) p.setAttribute("aria-pressed", marcado ? "true" : "false");
+    svg.appendChild(p);
+  }
+  const lots = M.lots.map(i => D.lotes[i]);
+  for (const L of lots) {
+    const p = el("polygon", { class: "lote " + L.nivel, points: pts(L.poly, X, Y) });
+    const marcado = conj.has(L.i);
+    activable(p, () => tocar(M.key, L.i), `${L.id}: ${fmt(L.sup)} metros cuadrados. ${NIVEL[L.nivel]}.` + (sumando ? (marcado ? " Está en la suma; toca para quitarlo." : " Toca para sumarlo.") : ""));
+    if (sumando) p.setAttribute("aria-pressed", marcado ? "true" : "false");
+    svg.appendChild(p);
+    if (L.nivel === "baja") svg.appendChild(el("polygon", { class: "trama", points: pts(L.poly, X, Y), fill: "url(#raya)" }));
+  }
+  for (const it of [...lots, ...calles]) if (conj.has(it.i)) svg.appendChild(el("polygon", { class: "sumado", points: pts(it.poly, X, Y) }));
+  const sel = item(estado.lote);
+  const visible = sel && (esCalle(sel.i) ? calles.includes(sel) : sel.mz === M.key);
+  if (!sumando && visible) svg.appendChild(el("polygon", { class: "elegido", points: pts(sel.poly, X, Y) }));
+  svg.appendChild(el("polygon", { class: "contorno", points: pts(M.outline, X, Y) }));
+  const off = 11;
+  for (const q of D.cotas) {
+    if (q.mz !== M.key) continue;
+    const x = X(q.s), y = Y(q.w);
+    let t;
+    if (q.r === "ave") t = el("text", { class: "cota", x: x, y: y + off + 4, "text-anchor": "middle", "font-size": 10.5 }, q.t);
+    else if (q.r === "este") t = el("text", { class: "cota", x: x, y: y - off + 3, "text-anchor": "middle", "font-size": 10.5, transform: `rotate(${ANG} ${x} ${y})` }, q.t);
+    else { const px = x - q.ns * off; t = el("text", { class: "cota", x: px, y: y, "text-anchor": "middle", "dominant-baseline": "central", "font-size": 10.5, transform: `rotate(-90 ${px} ${y})` }, q.t); }
+    svg.appendChild(t);
+  }
+  for (const L of lots) {
+    const x = X(L.c[0]), y = Y(L.c[1]);
+    const ss = L.poly.map(p => p[0]), ancho = (Math.max(...ss) - Math.min(...ss)) * k;
+    const altoMin = Math.min(Math.abs(L.poly[3][1] - L.poly[0][1]), Math.abs(L.poly[2][1] - L.poly[1][1])) * k;
+    const ok = conj.has(L.i), cls = "n-lote" + (ok ? " sum" : "");
+    const num = (ok ? "✓ " : "") + (L.num === "s/n" ? "s/n" : L.num);
+    if (altoMin < 46 && ancho > 150) {
+      svg.appendChild(el("text", { class: cls, x: x, y: y + 1, "text-anchor": "middle", "font-size": 14 }, `${num} · ${fmt(L.sup)} m²`));
+    } else {
+      const chico = ancho < 90;
+      svg.appendChild(el("text", { class: cls, x: x, y: y - 3, "text-anchor": "middle", "font-size": chico ? 15 : 17 }, num));
+      svg.appendChild(el("text", { class: "s-lote", x: x, y: y + 13, "text-anchor": "middle", "font-size": chico ? 10 : 11.5 }, fmt(L.sup) + (chico ? "" : " m²")));
+    }
+  }
+  // calles: ancho sobre la avenida y rótulo con nombre y superficie, a lo largo de la calle
+  for (const C of calles) {
+    const xc = X((C.sa + C.sb) / 2), gapPx = (C.sb - C.sa) * k;
+    const yA = Y(0) + 26;
+    svg.appendChild(el("text", { class: "cota", x: xc, y: yA, "text-anchor": "middle", "dominant-baseline": "central", "font-size": 10.5, transform: `rotate(-90 ${xc} ${yA})` }, "≈" + (C.sb - C.sa).toFixed(2)));
+    const yc = Y(C.c[1] + 6), fs = Math.min(13, Math.max(10.5, gapPx * 0.36));
+    const ok = conj.has(C.i);
+    svg.appendChild(el("text", { class: "n-calle" + (ok ? " sum" : ""), x: xc, y: yc, "text-anchor": "middle", "dominant-baseline": "central", "font-size": fs, transform: `rotate(-90 ${xc} ${yc})` }, `${ok ? "✓ " : ""}${C.corto} · ${fmt(C.sup)} m²`));
+  }
+  const sm = (M.s0 + M.s1) / 2, xe = X(sm), ye = Y(108.17 - 0.1128 * sm) + 22;
+  svg.appendChild(el("text", { class: "rot", x: xe, y: ye, "text-anchor": "middle", "font-size": 11.5, transform: `rotate(${ANG} ${xe} ${ye})` }, "LINDERO ORIENTE"));
+  caja.replaceChildren(svg);
+  document.getElementById("desliza").hidden = W <= cw + 14;
+  document.getElementById("ayuda").textContent = sumando
+    ? "Toca cada lote o calle que quieras sumar y vuelve a tocarlo para quitarlo. Puedes cambiar de manzana: la suma se conserva."
+    : "Cotas en metros. La avenida queda arriba y el lindero oriente abajo, igual que en la copia en papel. Las franjas grises entre manzanas son las calles. Toca un lote o una calle para ver su ficha.";
+}
+
+/* ---------- suma parcial ---------- */
+function textoLista(ids) {
+  const filas = ids.map(i => item(i).id + "\t" + fmt(item(i).sup));
+  filas.push(`Suma parcial (${cuenta(ids)})\t${fmt(sumaDe(ids))}`);
+  return filas.join("\n");
+}
+function pintarSuma() {
+  const s = document.getElementById("suma");
+  const ver = estado.modo === "suma" || conj.size > 0;
+  s.hidden = !ver;
+  if (!ver) return;
+  const ids = [...conj].sort((a, b) => a - b), total = sumaDe(ids), M = mzDe(estado.mz);
+  const partes = [];
+  const cab = h("div");
+  cab.appendChild(h("p", "sobre", "Suma parcial"));
+  const v = h("div", "sup"); v.appendChild(h("span", "valor", fmt(total))); v.appendChild(h("span", "unidad", "m²")); cab.appendChild(v);
+  partes.push(cab);
+  const acc = h("div", "acciones");
+  if (!ids.length) {
+    partes.push(h("p", "obs", "Aún no hay nada marcado. Toca lotes o calles en el dibujo, o marca su casilla en la lista de abajo."));
+    if (previo) acc.appendChild(boton("btn-deshacer", `Recuperar lo que quitaste (${cuenta(previo)})`, "", () => { conj = new Set(previo); previo = null; guardar(); pintar(); }));
+  } else {
+    partes.push(h("p", "nota", `${cuenta(ids)} · ${(100 * total / D.total_todo).toFixed(1)} % de lotes y calles de la franja`));
+    const dl = h("dl", "medidas");
+    for (const m of D.manzanas) {
+      const suyos = ids.filter(i => !esCalle(i) && D.lotes[i].mz === m.key);
+      if (!suyos.length) continue;
+      dl.appendChild(h("dt", null, `${nombreMz(m)} · ${suyos.length} de ${m.n} lotes`)); dl.appendChild(h("dd", null, fmt(sumaDe(suyos)) + " m²"));
+    }
+    const cs = ids.filter(esCalle);
+    if (cs.length) { dl.appendChild(h("dt", null, `Calles entre manzanas · ${cs.length} de ${D.calles.length}`)); dl.appendChild(h("dd", null, fmt(sumaDe(cs)) + " m²")); }
+    partes.push(dl);
+    const ul = h("ul", "suma-lista");
+    for (const i of ids) {
+      const L = item(i), li = h("li");
+      li.appendChild(h("span", null, etiquetaCorta(L))); li.appendChild(h("span", "num", fmt(L.sup)));
+      const b = h("button", "quitar", "Quitar"); b.type = "button"; b.setAttribute("aria-label", "Quitar de la suma: " + L.id);
+      b.addEventListener("click", () => { alternar(i, false); pintar(); });
+      li.appendChild(b); ul.appendChild(li);
+    }
+    partes.push(ul);
+  }
+  if (M.lots.some(i => !conj.has(i))) acc.appendChild(boton("btn-sumar-mz", M.key === "F" ? "Sumar toda la franja final" : `Sumar toda la ${M.nombre.toLowerCase()}`, "", () => { for (const i of M.lots) conj.add(i); previo = null; guardar(); pintar(); }));
+  if (CALLES.some(i => !conj.has(i))) acc.appendChild(boton("btn-sumar-calles", "Sumar las 5 calles", "", () => { for (const i of CALLES) conj.add(i); previo = null; guardar(); pintar(); }));
+  if (ids.length) {
+    acc.appendChild(boton("btn-copiar", "Copiar lista", "", ev => {
+      const txt = textoLista(ids), b = ev.currentTarget;
+      const listo = () => { b.textContent = "Lista copiada"; setTimeout(() => { b.textContent = "Copiar lista"; }, 1600); };
+      const manual = () => { const ta = document.getElementById("copia"); ta.hidden = false; ta.value = txt; ta.focus(); ta.select(); };
+      try { navigator.clipboard.writeText(txt).then(listo, manual); } catch (e) { manual(); }
+    }));
+    acc.appendChild(boton("btn-quitar-todos", "Quitar todos", "", () => { previo = ids; conj = new Set(); guardar(); pintar(); }));
+  }
+  partes.push(acc);
+  const ta = h("textarea", "copia"); ta.id = "copia"; ta.readOnly = true; ta.hidden = true; ta.rows = 5; ta.setAttribute("aria-label", "Lista de lo marcado, para copiar");
+  partes.push(ta);
+  s.replaceChildren(...partes);
+}
+function pintarBarra() {
+  const b = document.getElementById("barra"), n = conj.size;
+  b.hidden = n === 0; document.body.classList.toggle("con-barra", n > 0);
+  if (!n) return;
+  const ver = h("button", null, "Ver detalle"); ver.type = "button"; ver.id = "barra-ver";
+  ver.addEventListener("click", () => document.getElementById("suma").scrollIntoView({ block: "center", behavior: "smooth" }));
+  const txt = h("span", "t"); txt.append("Suma parcial de " + cuenta([...conj]) + ": "); txt.appendChild(h("b", "v", fmt(sumaDe([...conj])) + " m²"));
+  b.replaceChildren(txt, ver);
+}
+
+/* ---------- ficha ---------- */
+function pintarFicha() {
+  const L = item(estado.lote);
+  const f = document.getElementById("ficha");
+  const calle = esCalle(L.i), M = calle ? null : mzDe(L.mz);
+  const cab = h("div");
+  cab.appendChild(h("p", "sobre", calle ? "Calle entre manzanas" : (M.key === "F" ? "Franja final · manzana sin número visible" : M.nombre)));
+  cab.appendChild(h("h3", null, calle ? L.corto : nombreLote(L)));
+  if (calle) cab.appendChild(h("p", "nota", L.id));
+  const sup = h("div", "sup");
+  sup.appendChild(h("span", "valor", fmt(L.sup)));
+  sup.appendChild(h("span", "unidad", calle ? "m² · calculada con el ancho deducido" : "m² · superficie en tu hoja de Drive"));
+  const dl = h("dl", "medidas");
+  for (const mm of L.medidas) { dl.appendChild(h("dt", null, mm.k)); dl.appendChild(h("dd", null, mm.v)); }
+  if (!calle) { dl.appendChild(h("dt", null, "Superficie que resulta de esas medidas")); dl.appendChild(h("dd", null, fmt(L.calc) + " m²")); }
+  const partes = [cab, sup, chip(L.nivel), dl];
+  const dif = L.calc - L.sup;
+  if (!calle && Math.abs(dif) > 0.05) partes.push(h("p", "aviso", `El dibujo con estas medidas da ${fmt(Math.abs(dif))} m² ${dif > 0 ? "más" : "menos"} que la superficie de la hoja.`));
+  const obs = h("p", "obs"); obs.appendChild(h("b", null, calle ? "Cómo se obtuvo" : "Observación en la hoja")); obs.appendChild(document.createTextNode(L.obs));
+  partes.push(obs);
+  const enSuma = conj.has(L.i);
+  const acc = h("div", "acciones");
+  acc.appendChild(boton("btn-ficha-suma", enSuma ? "Quitar de la suma parcial" : "Agregar a la suma parcial", enSuma ? "" : "fuerte", () => { alternar(L.i); pintar(); }));
+  partes.push(acc);
+  const pie = h("p", "pie-ficha");
+  if (calle) {
+    pie.append("Las 5 calles entre manzanas suman "); pie.appendChild(h("b", null, fmt(D.total_calles) + " m²"));
+    pie.append(`. Esta calle es el ${(100 * L.sup / D.total_calles).toFixed(1)} % de ese total.`);
+  } else {
+    pie.append("Subtotal de ", M.key === "F" ? "la franja final" : M.nombre.toLowerCase(), ": ");
+    pie.appendChild(h("b", null, fmt(M.subtotal) + " m²")); pie.append(` en ${M.n} lotes. Este lote es el ${(100 * L.sup / M.subtotal).toFixed(1)} % de ese subtotal.`);
+  }
+  partes.push(pie);
+  f.replaceChildren(...partes);
+}
+
+/* ---------- lista ---------- */
+function casilla(id, etiqueta, fn) {
+  const c = h("input"); c.type = "checkbox"; c.id = id; c.setAttribute("aria-label", etiqueta);
+  c.addEventListener("change", () => fn(c.checked));
+  return c;
+}
+function filaItem(tb, L, mzKey) {
+  const i = L.i;
+  const tr = h("tr", "fila" + (esCalle(i) ? " fila-calle" : "")); tr.dataset.i = i; tr.tabIndex = 0;
+  const tc = h("td", "c"); tc.appendChild(casilla("chk-" + i, "Sumar " + L.id, on => { alternar(i, on); pintar(); })); tr.appendChild(tc);
+  tr.appendChild(h("td", null, L.id)); tr.appendChild(h("td", "d", fmt(L.sup)));
+  const td = h("td"); td.appendChild(chip(L.nivel, true)); tr.appendChild(td);
+  const ir = () => { elegir(mzKey, i); document.getElementById("mz-titulo").scrollIntoView({ block: "center", behavior: "smooth" }); };
+  tr.addEventListener("click", e => { if (e.target.closest("td.c")) return; ir(); });
+  tr.addEventListener("keydown", e => { if (e.target !== tr) return; if (e.key === "Enter") { e.preventDefault(); ir(); } });
+  tb.appendChild(tr);
+}
+function filaSuma(tb, cls, chk, texto, valor) {
+  const s = h("tr", cls);
+  const tc = h("td", "c"); if (chk) tc.appendChild(chk); s.appendChild(tc);
+  s.appendChild(h("td", null, texto)); s.appendChild(h("td", "d", fmt(valor))); s.appendChild(h("td"));
+  tb.appendChild(s); return s;
+}
+function armarTabla() {
+  const tb = document.getElementById("cuerpo");
+  for (const M of D.manzanas) {
+    for (const i of M.lots) filaItem(tb, D.lotes[i], M.key);
+    filaSuma(tb, "sub", casilla("chk-mz-" + M.key, "Sumar todos los lotes de " + nombreMz(M), on => { for (const i of M.lots) { if (on) conj.add(i); else conj.delete(i); } previo = null; guardar(); pintar(); }),
+      `Subtotal ${nombreMz(M)} (${plural(M.n)})`, M.subtotal);
+  }
+  filaSuma(tb, "sub fuerte", null, `Total de lotes (${plural(D.lotes.length)})`, D.total);
+  const cab = h("tr", "cab-calles"); const tdc = h("td"); tdc.colSpan = 4; tdc.textContent = "Calles entre manzanas"; cab.appendChild(tdc); tb.appendChild(cab);
+  for (const C of D.calles) filaItem(tb, C, C.mzN);
+  filaSuma(tb, "sub", casilla("chk-calles", "Sumar todas las calles entre manzanas", on => { for (const i of CALLES) { if (on) conj.add(i); else conj.delete(i); } previo = null; guardar(); pintar(); }),
+    `Subtotal de calles (${plural(D.calles.length, "calle", "calles")})`, D.total_calles);
+  filaSuma(tb, "total", null, `Total lotes y calles (${D.lotes.length + D.calles.length} superficies)`, D.total_todo);
+  const p = h("tr", "parcial"); p.id = "fila-parcial"; p.hidden = true;
+  p.appendChild(h("td", "c")); const a = h("td"); a.id = "parcial-txt"; p.appendChild(a); const b = h("td", "d"); b.id = "parcial-val"; p.appendChild(b); p.appendChild(h("td"));
+  tb.appendChild(p);
+}
+
+function pintar() {
+  for (const b of document.querySelectorAll("#pestanas button")) {
+    const M = mzDe(b.dataset.mz), k = M.lots.filter(i => conj.has(i)).length;
+    b.setAttribute("aria-pressed", M.key === estado.mz ? "true" : "false");
+    b.textContent = nombreMz(M) + (k ? " · " + k + " ✓" : "");
+  }
+  document.getElementById("modo-ficha").setAttribute("aria-pressed", estado.modo === "ficha" ? "true" : "false");
+  document.getElementById("modo-suma").setAttribute("aria-pressed", estado.modo === "suma" ? "true" : "false");
+  pintarLlave(); pintarDetalle(); pintarSuma(); pintarFicha(); pintarBarra();
+  for (const tr of document.querySelectorAll("tr.fila")) {
+    const i = +tr.dataset.i;
+    tr.classList.toggle("activa", i === estado.lote); tr.classList.toggle("marcada", conj.has(i));
+    tr.querySelector("input").checked = conj.has(i);
+  }
+  for (const M of D.manzanas) {
+    const c = document.getElementById("chk-mz-" + M.key), k = M.lots.filter(i => conj.has(i)).length;
+    c.checked = k === M.n; c.indeterminate = k > 0 && k < M.n;
+  }
+  const cc = document.getElementById("chk-calles"), kc = CALLES.filter(i => conj.has(i)).length;
+  cc.checked = kc === CALLES.length; cc.indeterminate = kc > 0 && kc < CALLES.length;
+  const fp = document.getElementById("fila-parcial"); fp.hidden = conj.size === 0;
+  if (conj.size) { document.getElementById("parcial-txt").textContent = `Suma parcial (${cuenta([...conj])} marcados)`; document.getElementById("parcial-val").textContent = fmt(sumaDe([...conj])); }
+}
+
+function iniciar(hd) {
+  const r = document.getElementById("resumen");
+  for (const [v, t] of [[D.manzanas.length, "manzanas"], [D.lotes.length, "lotes"], [fmt(D.total) + " m²", "en lotes"], [D.calles.length, "calles entre manzanas"], ["797.56 m", "sobre la avenida"]]) {
+    const li = h("li"); li.appendChild(h("b", null, String(v))); li.append(" " + t); r.appendChild(li);
+  }
+  const f = document.getElementById("fuente");
+  f.append("Superficies y observaciones de los lotes tomadas de tu hoja ");
+  const a = h("a", null, "Superficies lotes Lomas de Los Sauces"); a.href = D.hoja; a.target = "_blank"; a.rel = "noopener"; f.appendChild(a);
+  f.append(` el ${D.fecha}. Si cambias la hoja, esta página no se actualiza sola.`);
+  const p = document.getElementById("pestanas");
+  for (const M of D.manzanas) { const b = h("button", null, nombreMz(M)); b.type = "button"; b.dataset.mz = M.key; b.id = "pest-" + M.key; b.addEventListener("click", () => elegir(M.key)); p.appendChild(b); }
+  document.getElementById("modo-ficha").addEventListener("click", () => ponerModo("ficha"));
+  document.getElementById("modo-suma").addEventListener("click", () => ponerModo("suma"));
+  armarTabla();
+  try { const g = JSON.parse(localStorage.getItem(CLAVE) || "null"); if (g) { conj = new Set((g.c || []).filter(valido)); if (g.m === "suma" || g.m === "ficha") estado.modo = g.m; } } catch (e) {}
+  if (hd && Array.isArray(hd.conj)) {
+    conj = new Set(hd.conj.filter(valido));
+    if (hd.modo === "suma" || hd.modo === "ficha") estado.modo = hd.modo;
+    if (mzDe(hd.mz) && valido(hd.lote)) { estado.mz = hd.mz; estado.lote = hd.lote; }
+  } else {
+    const tok = (location.hash || "").slice(1).toLowerCase();
+    const m0 = D.manzanas.find(m => "m" + m.key.toLowerCase() === tok);
+    if (m0) { estado.mz = m0.key; estado.lote = m0.lots[0]; }
+  }
+  pintar();
+  let t = 0; window.addEventListener("resize", () => { clearTimeout(t); t = setTimeout(() => { pintarLlave(); pintarDetalle(); }, 120); });
+}
+try { window.claude?.hot?.snapshot?.(() => ({ conj: [...conj], modo: estado.modo, mz: estado.mz, lote: estado.lote })); } catch (e) {}
+if (window.claude?.hot?.ready) window.claude.hot.ready(d => iniciar(d || {})); else iniciar(window.claude?.hot?.data ?? {});
+</script>
+
+</body></html>
